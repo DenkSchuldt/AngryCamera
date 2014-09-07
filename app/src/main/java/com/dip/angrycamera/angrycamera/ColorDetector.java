@@ -8,6 +8,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
@@ -24,6 +25,7 @@ public class ColorDetector {
     Mat mMask = new Mat();
     Mat mDilatedMask = new Mat();
     Mat mHierarchy = new Mat();
+    Point point;
 
     /*
      * {120, [1,10]} : Cyan - (46,190,187)
@@ -51,6 +53,7 @@ public class ColorDetector {
         Imgproc.findContours(mDilatedMask, contours, mHierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
         double maxArea = 0;
         Iterator<MatOfPoint> contour = contours.iterator();
+
         while (contour.hasNext()) {
             MatOfPoint container = contour.next();
             double area = Imgproc.contourArea(container);
@@ -64,6 +67,8 @@ public class ColorDetector {
             if (Imgproc.contourArea(max) > mMinArea*maxArea) {
                 Core.multiply(max, new Scalar(4,4), max);
                 mBorder.add(max);
+                Point[] pArray = max.toArray();
+                point = pArray[0];
                 break; // the biggest
             }
         }
@@ -72,7 +77,6 @@ public class ColorDetector {
     public List<MatOfPoint> getContours() {
         return mBorder;
     }
-    public Mat getSpectrum() {
-        return mSpectrum;
-    }
+    public Mat getSpectrum() { return mSpectrum; }
+    public Point getPoint() { return point; }
 }
