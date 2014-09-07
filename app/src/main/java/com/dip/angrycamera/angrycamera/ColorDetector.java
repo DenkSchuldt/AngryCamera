@@ -44,8 +44,8 @@ public class ColorDetector {
         Imgproc.pyrDown(rgbaImage, mZindex);
         Imgproc.pyrDown(mZindex, mZindex);
         Imgproc.cvtColor(mZindex, mHsvMat, Imgproc.COLOR_RGB2HSV_FULL);
-        //Core.inRange(mHsvMat, new Scalar(70, 135, 135), new Scalar(110, 255, 255), mMask); // Green
-        Core.inRange(mHsvMat, new Scalar(100, 135, 135), new Scalar(140, 255, 255), mMask); // Cyan
+        Core.inRange(mHsvMat, new Scalar(120, 100, 100), new Scalar(179, 255, 255), mMask); // real blue
+        //Core.inRange(mHsvMat, new Scalar(100, 135, 135), new Scalar(140, 255, 255), mMask); // Cyan
         Imgproc.dilate(mMask, mDilatedMask, new Mat());
         List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
         Imgproc.findContours(mDilatedMask, contours, mHierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);

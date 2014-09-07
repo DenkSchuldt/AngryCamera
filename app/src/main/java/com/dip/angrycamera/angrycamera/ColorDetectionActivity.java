@@ -14,12 +14,15 @@ import org.opencv.core.Size;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.highgui.Highgui;
+import org.opencv.android.Utils;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
 
+import java.io.IOException;
 import java.util.List;
 
 public class ColorDetectionActivity extends Activity implements CvCameraViewListener2 {
@@ -82,10 +85,28 @@ public class ColorDetectionActivity extends Activity implements CvCameraViewList
         mRgba.release();
     }
 
+
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
+
         mDetector.setHsvColor();
         Imgproc.resize(mDetector.getSpectrum(), mSpectrum, SPECTRUM_SIZE);
         mRgba = inputFrame.rgba();
+
+        try {
+            Mat m = Utils.loadResource(this, R.drawable.fotoc);
+            m.setTo(new Scalar(255,225,255));
+            Mat img = mRgba.submat(4, 4 + mSpectrum.rows(), 70, 70 + mSpectrum.cols());
+
+           // Imgproc.resize(m, m, new Size (50, 50));
+
+            //Imgproc.cvtColor(m, m, Imgproc.COLOR_GRAY2RGBA);
+            m.copyTo(img);
+        }catch (IOException e){
+            e.printStackTrace();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
         Size k = new Size(3,3);
         Imgproc.GaussianBlur(mRgba, mRgba, k, 2);
 
@@ -96,14 +117,18 @@ public class ColorDetectionActivity extends Activity implements CvCameraViewList
 
         Core.circle(mRgba, new Point(170,780), 150, new Scalar(0,0,255), 3);
 
+
+
         // Dibuja el cuadradito
-        Mat colorLabel = mRgba.submat(4, 68, 4, 68);
-        colorLabel.setTo(mBlobColorRgba);
+        /*Mat colorLabel = mRgba.submat(4, 68, 4, 68);
+        colorLabel.setTo(mBlobColorRgba);*/
 
         // Dibuja el espectro
-        Mat spectrumLabel = mRgba.submat(4, 4 + mSpectrum.rows(), 70, 70 + mSpectrum.cols());
-        mSpectrum.copyTo(spectrumLabel);
+        /*Mat spectrumLabel = mRgba.submat(4, 4 + mSpectrum.rows(), 70, 70 + mSpectrum.cols());
+        mSpectrum.copyTo(spectrumLabel);*/
         return mRgba;
     }
+
+
 }
 
