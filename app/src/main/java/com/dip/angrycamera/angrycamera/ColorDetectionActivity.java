@@ -38,6 +38,9 @@ public class ColorDetectionActivity extends Activity implements CvCameraViewList
     private Mat             mSpectrum;
     private Size            SPECTRUM_SIZE;
     private Scalar          CONTOUR_COLOR;
+    private int             camWidth, camHeight, squareSize, circleRadius, circleOffset;
+    private Scalar          circleColor;
+    private Boolean         isGalaxy = false, isNexus = false;
 
     private CameraBridgeViewBase mOpenCvCameraView;
 
@@ -78,11 +81,29 @@ public class ColorDetectionActivity extends Activity implements CvCameraViewList
     }
 
     public void onCameraViewStarted(int width, int height) {
+        camWidth = width;
+        camHeight = height;
+        if(camWidth == 800 && camHeight == 480){
+            isGalaxy = true;
+            squareSize = 50;
+            circleRadius = 80;
+            circleOffset = 10;
+            mPig01 = new Mat(squareSize,squareSize, CvType.CV_8UC4, new Scalar(255,255,255));
+            mPig02 = new Mat(squareSize,squareSize, CvType.CV_8UC4, new Scalar(255,255,255));
+            mPig03 = new Mat(squareSize,squareSize, CvType.CV_8UC4, new Scalar(255,255,255));
+            mBird  = new Mat(squareSize,squareSize, CvType.CV_8UC4, new Scalar(255,0,0));
+        }
+        if(camWidth == 1280 && camHeight == 960){
+            isNexus = true;
+            squareSize = 120;
+            circleRadius = 150;
+            circleOffset = 30;
+            mPig01 = new Mat(squareSize,squareSize, CvType.CV_8UC4, new Scalar(255,255,255));
+            mPig02 = new Mat(squareSize,squareSize, CvType.CV_8UC4, new Scalar(255,255,255));
+            mPig03 = new Mat(squareSize,squareSize, CvType.CV_8UC4, new Scalar(255,255,255));
+            mBird  = new Mat(squareSize,squareSize, CvType.CV_8UC4, new Scalar(255,0,0));
+        }
         mRgba = new Mat(height, width, CvType.CV_8UC4);
-        mPig01 = new Mat(120, 120, CvType.CV_8UC4, new Scalar(255,255,255));
-        mPig02 = new Mat(120, 120, CvType.CV_8UC4, new Scalar(255,255,255));
-        mPig03 = new Mat(120, 120, CvType.CV_8UC4, new Scalar(255,255,255));
-        mBird = new Mat(120, 120, CvType.CV_8UC4, new Scalar(255,0,0));
         mDetector = new ColorDetector();
         mSpectrum = new Mat();
         mBlobColorRgba = new Scalar(46,190,187);
@@ -99,13 +120,48 @@ public class ColorDetectionActivity extends Activity implements CvCameraViewList
         mDetector.setHsvColor();
         Imgproc.resize(mDetector.getSpectrum(), mSpectrum, SPECTRUM_SIZE);
         mRgba = inputFrame.rgba();
+        circleColor = new Scalar(180,180,180);
 
-        Mat roi01 = mRgba.submat(200,320,780,900);
-        Mat roi02 = mRgba.submat(340,460,880,1000);
-        Mat roi03 = mRgba.submat(480,600,900,1020);
-        mPig01.copyTo(roi01);
-        mPig02.copyTo(roi02);
-        mPig03.copyTo(roi03);
+        // Filtro Gaussiano
+        Size k = new Size(3,3);
+        Imgproc.GaussianBlur(mRgba, mRgba, k, 2);
+
+        // Obtener el color y dibujar el contorno del area detectada
+        mDetector.analize(mRgba);
+        List<MatOfPoint> contours = mDetector.getContours();
+        Imgproc.drawContours(mRgba, contours, -1, CONTOUR_COLOR,3);
+
+        if(isGalaxy){
+            //Cambiar las posiciones de los cuadrados a partir de la pantalla
+            /*Mat roi01 = mRgba.submat(250,250+squareSize,940,940+squareSize);
+            Mat roi02 = mRgba.submat(420,420+squareSize,1010,1010+squareSize);
+            Mat roi03 = mRgba.submat(590,590+squareSize,1080,1080+squareSize);
+            mPig01.copyTo(roi01);
+            mPig02.copyTo(roi02);
+            mPig03.copyTo(roi03);*/
+        }else if(isNexus) {
+            Mat roi01 = mRgba.submat(250,250+squareSize,940,940+squareSize);
+            Mat roi02 = mRgba.submat(420,420+squareSize,1010,1010+squareSize);
+            Mat roi03 = mRgba.submat(590,590+squareSize,1080,1080+squareSize);
+            mPig01.copyTo(roi01);
+            mPig02.copyTo(roi02);
+            mPig03.copyTo(roi03);
+        }
+
+        try {
+            int x = (int) mDetector.getPoint().x;
+            int y = (int) mDetector.getPoint().y;
+            System.out.println("COORD X: " + x);
+            System.out.println("COORD Y: " + y);
+            Mat roiBird = mRgba.submat(y,y+squareSize,x,x+squareSize);
+            mBird.copyTo(roiBird);
+            if(x>circleOffset && x<(circleOffset+(circleRadius*2)-squareSize) && y>camHeight-circleOffset-(circleRadius*2) && y <camHeight-circleOffset-squareSize)
+                circleColor = new Scalar(0,0,255);
+        }catch (Exception e) {}
+
+        //Imgproc.Canny(mRgba, mRgba, 100,3);
+
+        Core.circle(mRgba, new Point(circleOffset+circleRadius,camHeight-circleOffset-circleRadius),circleRadius,circleColor, 3);
 
         /*try {
             //Mat m = Utils.loadResource(this, R.drawable.fotoc);
@@ -119,25 +175,6 @@ public class ColorDetectionActivity extends Activity implements CvCameraViewList
         }catch (Exception e){
             e.printStackTrace();
         }*/
-
-        Size k = new Size(3,3);
-        Imgproc.GaussianBlur(mRgba, mRgba, k, 2);
-
-        mDetector.analize(mRgba);
-        List<MatOfPoint> contours = mDetector.getContours();
-        Imgproc.drawContours(mRgba, contours, -1, CONTOUR_COLOR,3);
-
-        try {
-            int x = (int) mDetector.getPoint().x;
-            int y = (int) mDetector.getPoint().y;
-            Mat roiBird = mRgba.submat(y, y + 120, x, x + 120);
-            mBird.copyTo(roiBird);
-        }catch (Exception e) {}
-
-        //Imgproc.Canny(mRgba, mRgba, 100,3);
-
-        Core.circle(mRgba, new Point(170,780), 150, new Scalar(0,0,255), 3);
-
         // Dibuja el cuadradito
         /*Mat colorLabel = mRgba.submat(4, 68, 4, 68);
         colorLabel.setTo(mBlobColorRgba);*/
