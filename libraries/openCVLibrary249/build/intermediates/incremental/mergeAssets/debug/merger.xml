@@ -4,8 +4,8 @@
     <dataSet config="main" >
         <source path="C:\Users\Liliana\Documents\Git\angrycamera\libraries\openCVLibrary249\src\main\assets" />
     </dataSet>
-    <dataSet config="release" >
-        <source path="C:\Users\Liliana\Documents\Git\angrycamera\libraries\openCVLibrary249\src\release\assets" />
+    <dataSet config="debug" >
+        <source path="C:\Users\Liliana\Documents\Git\angrycamera\libraries\openCVLibrary249\src\debug\assets" />
     </dataSet>
 
 </merger>

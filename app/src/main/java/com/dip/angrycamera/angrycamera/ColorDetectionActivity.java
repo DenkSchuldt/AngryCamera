@@ -133,12 +133,12 @@ public class ColorDetectionActivity extends Activity implements CvCameraViewList
 
         if(isGalaxy){
             //Cambiar las posiciones de los cuadrados a partir de la pantalla
-            /*Mat roi01 = mRgba.submat(250,250+squareSize,940,940+squareSize);
-            Mat roi02 = mRgba.submat(420,420+squareSize,1010,1010+squareSize);
-            Mat roi03 = mRgba.submat(590,590+squareSize,1080,1080+squareSize);
+            Mat roi01 = mRgba.submat(250,250+squareSize,550,550+squareSize);
+            Mat roi02 = mRgba.submat(400,400+squareSize,500,500+squareSize);
+            Mat roi03 = mRgba.submat(150,150+squareSize,650,650+squareSize);
             mPig01.copyTo(roi01);
             mPig02.copyTo(roi02);
-            mPig03.copyTo(roi03);*/
+            mPig03.copyTo(roi03);
         }else if(isNexus) {
             Mat roi01 = mRgba.submat(250,250+squareSize,940,940+squareSize);
             Mat roi02 = mRgba.submat(420,420+squareSize,1010,1010+squareSize);
