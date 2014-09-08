@@ -41,6 +41,7 @@ public class ColorDetectionActivity extends Activity implements CvCameraViewList
     private int             camWidth, camHeight, squareSize, circleRadius, circleOffset;
     private Scalar          circleColor;
     private Boolean         isGalaxy = false, isNexus = false;
+    private int             posx,posy;
 
     private CameraBridgeViewBase mOpenCvCameraView;
 
@@ -88,6 +89,8 @@ public class ColorDetectionActivity extends Activity implements CvCameraViewList
             squareSize = 50;
             circleRadius = 80;
             circleOffset = 10;
+            posx=70;
+            posy=100;
             mPig01 = new Mat(squareSize,squareSize, CvType.CV_8UC4, new Scalar(255,255,255));
             mPig02 = new Mat(squareSize,squareSize, CvType.CV_8UC4, new Scalar(255,255,255));
             mPig03 = new Mat(squareSize,squareSize, CvType.CV_8UC4, new Scalar(255,255,255));
@@ -131,57 +134,53 @@ public class ColorDetectionActivity extends Activity implements CvCameraViewList
         List<MatOfPoint> contours = mDetector.getContours();
         Imgproc.drawContours(mRgba, contours, -1, CONTOUR_COLOR,3);
 
-        if(isGalaxy){
-            //Cambiar las posiciones de los cuadrados a partir de la pantalla
-            Mat roi01 = mRgba.submat(250,250+squareSize,550,550+squareSize);
-            Mat roi02 = mRgba.submat(400,400+squareSize,500,500+squareSize);
-            Mat roi03 = mRgba.submat(150,150+squareSize,650,650+squareSize);
-            mPig01.copyTo(roi01);
-            mPig02.copyTo(roi02);
-            mPig03.copyTo(roi03);
-        }else if(isNexus) {
-            Mat roi01 = mRgba.submat(250,250+squareSize,940,940+squareSize);
-            Mat roi02 = mRgba.submat(420,420+squareSize,1010,1010+squareSize);
-            Mat roi03 = mRgba.submat(590,590+squareSize,1080,1080+squareSize);
-            mPig01.copyTo(roi01);
-            mPig02.copyTo(roi02);
-            mPig03.copyTo(roi03);
-        }
+        try {
+
+            if (isGalaxy) {
+                //Cambiar las posiciones de los cuadrados a partir de la pantalla
+                Mat roi01 = mRgba.submat(250, 250 + squareSize, 550, 550 + squareSize);
+                Mat roi02 = mRgba.submat(400, 400 + squareSize, 500, 500 + squareSize);
+                Mat roi03 = mRgba.submat(150, 150 + squareSize, 650, 650 + squareSize);
+                mPig01 = Utils.loadResource(this, R.drawable.pig50);
+                mPig02 = Utils.loadResource(this, R.drawable.pig50);
+                mPig03 = Utils.loadResource(this, R.drawable.pig50);
+                Imgproc.resize(mPig01, mPig01, new Size(50, 50));
+                Imgproc.resize(mPig02, mPig02, new Size(50, 50));
+                Imgproc.resize(mPig03, mPig03, new Size(50, 50));
+                mPig01.copyTo(roi01);
+                mPig02.copyTo(roi02);
+                mPig03.copyTo(roi03);
+            } else if (isNexus) {
+                Mat roi01 = mRgba.submat(250, 250 + squareSize, 940, 940 + squareSize);
+                Mat roi02 = mRgba.submat(420, 420 + squareSize, 1010, 1010 + squareSize);
+                Mat roi03 = mRgba.submat(590, 590 + squareSize, 1080, 1080 + squareSize);
+                mPig01 = Utils.loadResource(this, R.drawable.pig120);
+                mPig02 = Utils.loadResource(this, R.drawable.pig120);
+                mPig03 = Utils.loadResource(this, R.drawable.pig120);
+                Imgproc.resize(mPig01, mPig01, new Size(120, 120));
+                Imgproc.resize(mPig02, mPig02, new Size(120, 120));
+                Imgproc.resize(mPig03, mPig03, new Size(120, 120));
+                mPig01.copyTo(roi01);
+                mPig02.copyTo(roi02);
+                mPig03.copyTo(roi03);
+            }
+        }catch(IOException e){}
 
         try {
             int x = (int) mDetector.getPoint().x;
             int y = (int) mDetector.getPoint().y;
             System.out.println("COORD X: " + x);
             System.out.println("COORD Y: " + y);
+
             Mat roiBird = mRgba.submat(y,y+squareSize,x,x+squareSize);
             mBird.copyTo(roiBird);
             if(x>circleOffset && x<(circleOffset+(circleRadius*2)-squareSize) && y>camHeight-circleOffset-(circleRadius*2) && y <camHeight-circleOffset-squareSize)
-                circleColor = new Scalar(0,0,255);
+                circleColor = new Scalar(0, 0, 255);
+
         }catch (Exception e) {}
 
-        //Imgproc.Canny(mRgba, mRgba, 100,3);
 
         Core.circle(mRgba, new Point(circleOffset+circleRadius,camHeight-circleOffset-circleRadius),circleRadius,circleColor, 3);
-
-        /*try {
-            //Mat m = Utils.loadResource(this, R.drawable.fotoc);
-            //m.setTo(new Scalar(255,225,255));
-            //Mat img = mRgba.submat(4, 4 + mSpectrum.rows(), 70, 70 + mSpectrum.cols());
-           // Imgproc.resize(m, m, new Size (50, 50));
-            //Imgproc.cvtColor(m, m, Imgproc.COLOR_GRAY2RGBA);
-            //m.copyTo(img);
-        }catch (IOException e){
-            e.printStackTrace();
-        }catch (Exception e){
-            e.printStackTrace();
-        }*/
-        // Dibuja el cuadradito
-        /*Mat colorLabel = mRgba.submat(4, 68, 4, 68);
-        colorLabel.setTo(mBlobColorRgba);*/
-
-        // Dibuja el espectro
-        /*Mat spectrumLabel = mRgba.submat(4, 4 + mSpectrum.rows(), 70, 70 + mSpectrum.cols());
-        mSpectrum.copyTo(spectrumLabel);*/
         return mRgba;
     }
 }
